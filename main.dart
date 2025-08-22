@@ -1,138 +1,142 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(CourseDashboardApp());
+  runApp(StudentInfoApp());
 }
 
-class CourseDashboardApp extends StatelessWidget {
+class StudentInfoApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Course Dashboard',
-      theme: ThemeData(primarySwatch: Colors.teal),
-      home: DashboardHome(),
+      title: 'Student Info Manager',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: StudentHomePage(),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
-class DashboardHome extends StatefulWidget {
+class StudentHomePage extends StatefulWidget {
   @override
-  _DashboardHomeState createState() => _DashboardHomeState();
+  _StudentHomePageState createState() => _StudentHomePageState();
 }
 
-class _DashboardHomeState extends State<DashboardHome> {
-  int _selectedIndex = 0;
-  String selectedCategory = "None";
+class _StudentHomePageState extends State<StudentHomePage> {
+  int studentCount = 0;
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
-  // Dummy course list
-  final List<Map<String, dynamic>> courses = [
-    {"name": "Flutter Dev", "instructor": "Mr. Kwame", "icon": Icons.phone_android},
-    {"name": "Database Systems", "instructor": "Mrs. Ama", "icon": Icons.storage},
-    {"name": "Networking", "instructor": "Mr. Kofi", "icon": Icons.wifi},
-    {"name": "Web Development", "instructor": "Miss Afia", "icon": Icons.web},
-    {"name": "AI & ML", "instructor": "Dr. Mensah", "icon": Icons.computer},
-  ];
+  // Profile Picture URL
+  String profileUrl =
+      "https://www.w3schools.com/w3images/avatar2.png"; // replace with your own
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Course Dashboard")),
-      body: Center(
-        child: _selectedIndex == 0
-            ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text("Home Page",
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                ],
-              )
-            : _selectedIndex == 1
-                ? ListView.builder(
-                    itemCount: courses.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        leading: Icon(courses[index]["icon"]),
-                        title: Text(courses[index]["name"]),
-                        subtitle: Text("Instructor: ${courses[index]["instructor"]}"),
-                      );
+      appBar: AppBar(title: Text("Student Info Manager")),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // a. Welcome Dashboard
+            Text(
+              "Name: Your Name\nCourse: BSc. IT\nUniversity: UENR",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Arial'),
+            ),
+            SizedBox(height: 20),
+
+            // b. Interactive Notification
+            ElevatedButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content:
+                      Text("Hello, Your Name! Welcome to the Student Info Manager."),
+                  duration: Duration(seconds: 2),
+                ));
+              },
+              child: Text("Show Alert"),
+            ),
+            SizedBox(height: 20),
+
+            // c. Student Counter
+            Text("Students Enrolled: $studentCount",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                    onPressed: () {
+                      setState(() {
+                        studentCount++;
+                      });
                     },
-                  )
-                : Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("Profile Page",
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold)),
-                      SizedBox(height: 20),
+                    icon: Icon(Icons.add_circle, color: Colors.green, size: 32)),
+                IconButton(
+                    onPressed: () {
+                      setState(() {
+                        if (studentCount > 0) studentCount--;
+                      });
+                    },
+                    icon: Icon(Icons.remove_circle, color: Colors.red, size: 32)),
+              ],
+            ),
+            SizedBox(height: 20),
 
-                      // d. Animated Action Button
-                      AnimatedScale(
-                        scale: 1.2,
-                        duration: Duration(seconds: 1),
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          child: Text("Enroll in a Course"),
-                        ),
-                      ),
-                      SizedBox(height: 20),
-
-                      // e. Course Selection Dropdown
-                      DropdownButton<String>(
-                        value: selectedCategory == "None" ? null : selectedCategory,
-                        hint: Text("Select Course Category"),
-                        items: ["Science", "Arts", "Technology"]
-                            .map((cat) => DropdownMenuItem(
-                                  value: cat,
-                                  child: Text(cat),
-                                ))
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            selectedCategory = value!;
-                          });
-                        },
-                      ),
-                      SizedBox(height: 10),
-                      Text("Selected Category: $selectedCategory"),
-                      SizedBox(height: 20),
-
-                      // c. Exit Confirmation Dialog
-                      ElevatedButton(
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: Text("Logout"),
-                                content: Text("Are you sure you want to exit the app?"),
-                                actions: [
-                                  TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: Text("No")),
-                                  TextButton(
-                                      onPressed: () => Navigator.of(context).pop(),
-                                      child: Text("Yes")),
-                                ],
-                              ),
-                            );
-                          },
-                          child: Text("Logout"))
-                    ],
+            // d. Student Login Form
+            Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: emailController,
+                    decoration: InputDecoration(labelText: "Email"),
+                    validator: (value) {
+                      if (value == null || !value.contains("@")) {
+                        return "Enter a valid email address";
+                      }
+                      return null;
+                    },
                   ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.book), label: "Courses"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-        ],
+                  TextFormField(
+                    controller: passwordController,
+                    decoration: InputDecoration(labelText: "Password"),
+                    obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.length < 6) {
+                        return "Password must be at least 6 characters";
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 10),
+                  ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text("Login Successful for ${emailController.text}")));
+                        }
+                      },
+                      child: Text("Login"))
+                ],
+              ),
+            ),
+            SizedBox(height: 20),
+
+            // e. Profile Picture Display
+            ClipOval(
+              child: Image.network(
+                profileUrl,
+                height: 120,
+                width: 120,
+                fit: BoxFit.cover,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
